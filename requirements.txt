@@ -1,0 +1,33 @@
+#### Data Working ####
+category_encoders
+kaggle
+pandas
+
+#### File Working####
+joblib
+
+#### Math ####
+numpy
+
+#### ML ####
+scikit-learn
+
+#### Jupiter ####
+tqdm
+
+#### Visualization ####
+seaborn
+matplotlib
+
+#### Frameworks ####
+ray
+ray[train]
+optuna
+hyperopt
+mlmachine
+polyaxon
+bayesian-optimization
+talos
+parameter-sherpa
+scikit-optimize
+gpyopt
