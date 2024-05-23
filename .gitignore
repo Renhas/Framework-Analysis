@@ -1,3 +1,4 @@
 .venv/
 .vscode/
-kaggle.json
+*kaggle.json
+*temp
