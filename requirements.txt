@@ -24,10 +24,7 @@ ray
 ray[train]
 optuna
 hyperopt
-mlmachine
-polyaxon
 bayesian-optimization
 talos
-parameter-sherpa
 scikit-optimize
 gpyopt
