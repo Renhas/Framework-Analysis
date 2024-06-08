@@ -1,4 +1,8 @@
 .venv/
 .vscode/
+__pycache__/
 *kaggle.json
 *temp
+
+*.jpg
+*.png
