@@ -8,6 +8,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.datasets import load_diabetes
 from sklearn.model_selection import train_test_split
 
+from src.managers.hyperopt_manager import HyperoptManager, HyperoptParamsManager
 from src.managers.optuna_manager import OptunaManager, OptunaParamsManager
 from src.loaders.loaders_factory import SaveLoaderFactory, OptunaSaveLoaderFactory
 from src.managers.ray_tune_manager import RayTuneManager, RayTuneParamsManager
@@ -66,3 +67,18 @@ class TestOptuna():
         assert sl.iter_count == config.max_iter
         assert sl.load_trials(0).shape[0] == config.n_trials
         clean_up("tests/TestOptuna/")
+        
+class TestHyperopt():
+    def test_search(self):
+        clean_up("tests/TestHyperopt/")
+        sl = SaveLoaderFactory().create("tests/TestHyperopt/")
+        kit = ManagersKit(create_model_manager(), HyperoptParamsManager(get_params()))
+        config = get_config()
+        manager = HyperoptManager(sl, kit, config)
+        
+        manager.search()
+        
+        assert sl.iter_count == config.max_iter
+        assert sl.load_trials(0).shape[0] == config.n_trials
+        clean_up("tests/TestHyperopt/")
+        

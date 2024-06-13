@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Iterable, Tuple
+from typing import Any, Generator, Iterable, Tuple, Union
 from abc import ABC, abstractmethod
 
 from sklearn.base import BaseEstimator
@@ -58,11 +58,11 @@ class TrialsConverter(ABC):
         pass
     
     @abstractmethod
-    def _results_iterator(self):
+    def _results_iterator(self) -> Iterable[dict]:
         pass
     
     @abstractmethod
-    def _trials_iterator(self):
+    def _trials_iterator(self) -> Iterable[Any]:
         pass
         
     @abstractmethod
@@ -97,7 +97,7 @@ class Objective(ABC):
     def __init__(self, managers_kit: ManagersKit) -> None:
         self.kit = managers_kit
         
-    def _inner_objective(self, params: dict, n_jobs=-1):
+    def _inner_objective(self, params: dict, n_jobs=-1) -> Tuple[dict, BaseEstimator]:
         current_params = self.kit.params.format_space(params)
         model = self.kit.model.create_model(current_params)
         cv_results = self.kit.model.cross_validate_model(model, n_jobs=n_jobs)
