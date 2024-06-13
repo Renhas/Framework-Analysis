@@ -79,24 +79,13 @@ class OptunaManager(FrameworkManager):
     def __init__(self, loader: OptunaSaveLoader, managers_kit: ManagersKit, config: ManagerConfig) -> None:
         super().__init__(loader, managers_kit, config)
         
-    def __optimize(self):
-        objective = OptunaObjective(self.managers_kit)
+    def _optimize(self):
+        optuna.logging.set_verbosity(optuna.logging.WARNING)
         study = optuna.create_study(direction="maximize")
         start_time = time.time()
-        study.optimize(objective.objective, n_trials=self.config.n_trials, n_jobs=-1)
+        study.optimize(OptunaObjective(self.managers_kit).objective,
+                       n_trials=self.config.n_trials, n_jobs=-1)
         iter_time = time.time() - start_time
-        return study, iter_time
-    
-    def __format_results(self, converter: OptunaConverter, iter_time):
-        study_data = converter.to_results()
-        study_data[("Time", "Iteration")] = iter_time
-        params_names = self.managers_kit.params.params.keys()
-        return converter.to_history(params_names), study_data
-    
-    def one_iteration(self):
-        optuna.logging.set_verbosity(optuna.logging.WARNING)
-        study, end_time = self.__optimize()
         self.loader.save_study(study)
-        converter = OptunaConverter(study)
-        history, results = self.__format_results(converter, end_time)
-        return history, results, converter.get_best_params()
+        return OptunaConverter(study), iter_time
+    

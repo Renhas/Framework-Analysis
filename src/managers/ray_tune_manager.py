@@ -74,17 +74,26 @@ class RayTuneManager(FrameworkManager):
     def __init__(self, loader: SaveLoader, managers_kit: ManagersKit, config: ManagerConfig) -> None:
         super().__init__(loader, managers_kit, config)
     
-    def one_iteration(self):
-        result_grid, end_time = self.__optimize()
-        history, results, best_params = self.__format_results(RayTuneConverter(result_grid), end_time)        
-        del result_grid
-        gc.collect()
-        return history, results, best_params
+    def _optimize(self):
+        tuner = tune.Tuner(RayTuneObjective(self.managers_kit).objective,
+                           param_space=self.managers_kit.params.get_space(),
+                           tune_config=self.__tune_config(),
+                           run_config=self.__run_config())
+        start_time = time.time()
+        result_grid = tuner.fit()
+        iter_time = time.time() - start_time
+        return RayTuneConverter(result_grid), iter_time
     
     def __tune_config(self):
         return tune.TuneConfig(metric="score", mode="max",
                                num_samples=self.config.n_trials,
                                max_concurrent_trials=None)
+    
+    def __run_config(self):
+        return train.RunConfig(verbose=0, progress_reporter=CustomReporter(),
+                               storage_path=os.path.abspath("./Temp/Ray/Storage"),
+                               checkpoint_config=self.__checkpoint_config(),
+                               failure_config=self.__failure_config())
     
     @staticmethod
     def __checkpoint_config():
@@ -94,27 +103,3 @@ class RayTuneManager(FrameworkManager):
     def __failure_config():
         return train.FailureConfig(max_failures=3)
     
-    def __run_config(self):
-        return train.RunConfig(verbose=0, progress_reporter=CustomReporter(),
-                               storage_path=os.path.abspath("./Temp/Ray/Storage"),
-                               checkpoint_config=self.__checkpoint_config(),
-                               failure_config=self.__failure_config())
-    
-    def __optimize(self):
-        objective = RayTuneObjective(self.managers_kit)
-        tuner = tune.Tuner(objective.objective,
-                           param_space=self.managers_kit.params.get_space(),
-                           tune_config=self.__tune_config(),
-                           run_config=self.__run_config())
-        start_time = time.time()
-        result_grid = tuner.fit()
-        iter_time = time.time() - start_time
-        del tuner
-        gc.collect()
-        return result_grid, iter_time
-    
-    def __format_results(self, converter: RayTuneConverter, iter_time: int):
-        trials_results = converter.to_results()
-        trials_results[("Time", "Iteration")] = iter_time
-        params_names = self.managers_kit.params.params.keys()
-        return converter.to_history(params_names), trials_results, converter.get_best_params()

@@ -1,5 +1,5 @@
 import copy
-from typing import Iterable, Tuple
+from typing import Any, Iterable, Tuple
 from abc import ABC, abstractmethod
 
 from sklearn.base import BaseEstimator
@@ -47,6 +47,11 @@ class TrialsConverter(ABC):
             trial_dict = self._one_to_dict(trial)
             results.add(trial_dict)
         return results.values
+    
+    def format_all(self, params_names: list, iter_time: int):
+        trials_results = self.to_results()
+        trials_results[("Time", "Iteration")] = iter_time
+        return self.to_history(params_names), trials_results, self.get_best_params()
 
     @abstractmethod
     def get_best_params(self) -> dict:
@@ -120,22 +125,28 @@ class FrameworkManager(ABC):
     @property
     def managers_kit(self) -> ManagersKit:
         return self.__kit
-
-    @abstractmethod
-    def one_iteration(self) -> Tuple[dict, dict, dict]:
-        pass
         
     def search(self, logger: Logger = None) -> None:
         while self.__loader.iter_count < self.config.max_iter:
             if logger:
                 logger.log(f"Iter #{self.__loader.iter_count + 1}: ")
-            history, results, best_params = self.one_iteration()
-            model, test_results = self.__best_model(best_params)
-            results.update(test_results)
-            self.__save_all(model, history, results)
+            self.__save_all(*self.__get_results())
             self.__loader.next_iter()
             if logger:
                 logger.log("Results saved")
+                
+    def __get_results(self) -> Tuple[BaseEstimator, dict, dict]:
+        history, results, best_params = self.one_iteration()
+        model, test_results = self.__best_model(best_params)
+        results.update(test_results)
+        return model, history, results
+
+    def one_iteration(self) -> Tuple[dict, dict, dict]:
+        return self.__format_results(*self._optimize())
+
+    @abstractmethod            
+    def _optimize(self) -> Tuple[TrialsConverter, int]: 
+        pass
     
     def __save_all(self, model: BaseEstimator, history: dict, results: dict):
         self.__loader.save_model(model)
@@ -146,4 +157,7 @@ class FrameworkManager(ABC):
         model = self.__kit.model.create_model(best_params)
         trained = self.__kit.model.train_model(model)
         return trained, self.__kit.model.test_model(trained)
+    
+    def __format_results(self, converter: TrialsConverter, iter_time: int):
+        return converter.format_all(self.__kit.params.params.keys(), iter_time)
     
