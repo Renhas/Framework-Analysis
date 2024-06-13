@@ -7,10 +7,7 @@ from hyperopt.pyll import scope
 from src.loaders.loader import SaveLoader
 from src.managers.fw_manager import TrialsConverter, ParamsManager, ManagersKit, Objective, ManagerConfig, FrameworkManager
 
-class HyperoptParamsManager(ParamsManager):         
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
-        
+class HyperoptParamsManager(ParamsManager):        
     @staticmethod
     def extract_params(trial: dict):
         return {key: value[0] for key, value in trial['misc']["vals"].items()}
@@ -37,7 +34,7 @@ class HyperoptParamsManager(ParamsManager):
                                      self.params[name][1], self.params[name][2]))
     
 class HyperoptConverter(TrialsConverter):
-    def __init__(self, trials, params_manager: HyperoptParamsManager):
+    def __init__(self, trials: Trials, params_manager: HyperoptParamsManager):
         self.trials = trials
         self.params_manager = params_manager
         
@@ -60,18 +57,12 @@ class HyperoptConverter(TrialsConverter):
         }
     
 class HyperoptObjective(Objective):
-    def __init__(self, managers_kit: ManagersKit) -> None:
-        super().__init__(managers_kit)
-
     def objective(self, current_params: dict):
         cv_results, _ = self._inner_objective(current_params)
         return {"loss": -cv_results["test_r2"].mean(), "cv_results": cv_results,
                 "status": STATUS_OK}
         
-class HyperoptManager(FrameworkManager):
-    def __init__(self, loader: SaveLoader, managers_kit: ManagersKit, config: ManagerConfig) -> None:
-        super().__init__(loader, managers_kit, config)
-        
+class HyperoptManager(FrameworkManager):        
     def _optimize(self) -> Tuple[TrialsConverter, int]:
         trials = Trials()
         start_time = time.time()

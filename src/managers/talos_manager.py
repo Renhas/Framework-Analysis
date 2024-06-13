@@ -14,10 +14,7 @@ class TalosHistory():
                         "metric": [cv_results["test_r2"].mean()],
                         "val_temp": [np.NaN]}
 
-class TalosParamsManger(ParamsManager):
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
-        
+class TalosParamsManger(ParamsManager):        
     def get_space(self) -> dict:
         return {"criterion": self.params["criterion"],
                 "max_depth": self.__get_param_range("max_depth"),
@@ -66,17 +63,11 @@ class TalosConverter(TrialsConverter):
         return {key: trial[key] for key in self.scan_obj.params.keys()}       
 
 class TalosObjective(Objective):
-    def __init__(self, managers_kit: ManagersKit) -> None:
-        super().__init__(managers_kit)
-
     def objective(self, x_train, y_train, x_val, y_val, current_params):
         cv_results, model = self._inner_objective(current_params)
         return TalosHistory(cv_results), model
 
-class TalosManager(FrameworkManager):
-    def __init__(self, loader: SaveLoader, managers_kit: ManagersKit, config: ManagerConfig) -> None:
-        super().__init__(loader, managers_kit, config)
-        
+class TalosManager(FrameworkManager):        
     def _optimize(self) -> Tuple[TrialsConverter, int]:
         train_data = self.managers_kit.model.info.train_data
         start_time = time.time()

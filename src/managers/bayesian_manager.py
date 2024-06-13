@@ -26,10 +26,7 @@ class BayesianObserver():
     def log_cv_res(self, cv_results: dict) -> None:
         self.history_cv_res.append(cv_results)
         
-class BayesianParamsManager(ParamsManager):        
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
-            
+class BayesianParamsManager(ParamsManager):            
     def round_param(self, value: float, param_name: str):
         current_base = 1
         if len(self.params[param_name]) == 3 and isinstance(self.params[param_name][2], Number):
@@ -88,10 +85,7 @@ class BayesianObjective(Objective):
         self.observer.log_cv_res(cv_results)
         return cv_results["test_r2"].mean()
     
-class BayesianManager(FrameworkManager):
-    def __init__(self, loader: SaveLoader, managers_kit: ManagersKit, config: ManagerConfig) -> None:
-        super().__init__(loader, managers_kit, config)
-        
+class BayesianManager(FrameworkManager):        
     def _optimize(self) -> Tuple[TrialsConverter, int]:
         observer = BayesianObserver()
         optimizer = BayesianOptimization(

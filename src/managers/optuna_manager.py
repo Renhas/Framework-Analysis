@@ -29,20 +29,14 @@ class OptunaConverter(TrialsConverter):
             "Value": trial.values[0]
         }
 
-class OptunaParamsManager(ParamsManager):
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
-    
+class OptunaParamsManager(ParamsManager):    
     def get_space(self) -> dict:
         pass
     
     def format_space(self, space: dict) -> dict:
         return space
     
-class OptunaObjective(Objective):
-    def __init__(self, managers_kit: ManagersKit) -> None:
-        super().__init__(managers_kit)
-        
+class OptunaObjective(Objective):        
     def __suggest_int(self, trial, name: str):
         return trial.suggest_int(name,
                                  low=self.kit.params.params[name][0],
@@ -75,10 +69,7 @@ class OptunaObjective(Objective):
         trial.set_user_attr("cv_results", cv_results)
         return cv_results["test_r2"].mean()
     
-class OptunaManager(FrameworkManager):
-    def __init__(self, loader: OptunaSaveLoader, managers_kit: ManagersKit, config: ManagerConfig) -> None:
-        super().__init__(loader, managers_kit, config)
-        
+class OptunaManager(FrameworkManager):        
     def _optimize(self):
         optuna.logging.set_verbosity(optuna.logging.WARNING)
         study = optuna.create_study(direction="maximize")

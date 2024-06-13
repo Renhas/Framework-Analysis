@@ -32,10 +32,7 @@ class RayTuneConverter(TrialsConverter):
             "Value": trial["score"]
         }
         
-class RayTuneParamsManager(ParamsManager):
-    def __init__(self, params: dict) -> None:
-        super().__init__(params)
-        
+class RayTuneParamsManager(ParamsManager):        
     def __get_randint(self, name: str):
         return tune.qrandint(self.params[name][0], self.params[name][1], self.params[name][2])
     
@@ -55,9 +52,6 @@ class RayTuneParamsManager(ParamsManager):
         return space
 
 class RayTuneObjective(Objective):
-    def __init__(self, managers_kit: ManagersKit) -> None:
-        super().__init__(managers_kit)
-
     def objective(self, config: dict):
         cv_results, model = self._inner_objective(config, n_jobs=1)
         del model
@@ -70,10 +64,7 @@ class CustomReporter(tune.ProgressReporter):
     def report(self, trials, done, *sys_info):
         pass
     
-class RayTuneManager(FrameworkManager):
-    def __init__(self, loader: SaveLoader, managers_kit: ManagersKit, config: ManagerConfig) -> None:
-        super().__init__(loader, managers_kit, config)
-    
+class RayTuneManager(FrameworkManager):    
     def _optimize(self):
         tuner = tune.Tuner(RayTuneObjective(self.managers_kit).objective,
                            param_space=self.managers_kit.params.get_space(),
