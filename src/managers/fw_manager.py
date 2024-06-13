@@ -104,7 +104,7 @@ class Objective(ABC):
         return cv_results, model
     
     @abstractmethod
-    def objective(self, *args, **kwargs):
+    def objective(self, *args, **kwargs) -> Any:
         pass
 
 class ManagerConfig():
