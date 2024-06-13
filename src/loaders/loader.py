@@ -4,6 +4,8 @@ import joblib
 
 class PathManager():
     def __init__(self, folder_path):
+        if folder_path[-1] != "/":
+            folder_path += "/"
         self.folder = folder_path
         self.models_folder = f"{self.folder}models/"
         self.trials_folder = f"{self.folder}trials/"

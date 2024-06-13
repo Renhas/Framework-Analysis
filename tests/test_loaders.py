@@ -20,16 +20,22 @@ def clean_up(folder):
         shutil.rmtree(folder)
 
 class TestBaseLoader:
-    def test_path_manager(self):
-        clean_up("tests/Test/")
-        manager = PathManager("tests/Test/")
-        assert os.path.exists("tests/Test/")
-        assert os.path.exists("tests/Test/models/")
-        assert os.path.exists("tests/Test/trials/")
+    @pytest.mark.parametrize(
+        ("path", "expected"), [
+            ("tests/Test/", "tests/Test/"),
+            ("tests/Test", "tests/Test/")
+        ]
+    )
+    def test_path_manager(self, path, expected):
+        clean_up(expected)
+        manager = PathManager(path)
+        assert os.path.exists(expected)
+        assert os.path.exists(f"{expected}models/")
+        assert os.path.exists(f"{expected}trials/")
         assert manager.trials_count == 0
-        assert manager.one_trials(0) == "tests/Test/trials/trials_0.csv"
-        assert manager.one_model(0) == "tests/Test/models/model_0.joblib"
-        clean_up("tests/Test/")
+        assert manager.one_trials(0) == f"{expected}trials/trials_0.csv"
+        assert manager.one_model(0) == f"{expected}models/model_0.joblib"
+        clean_up(expected)
     
     def test_saveloader(self):
         clean_up("tests/Test/")
