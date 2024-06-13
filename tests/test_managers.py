@@ -9,7 +9,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.datasets import load_diabetes
 from sklearn.model_selection import train_test_split
 
-from managers.managers_builders import (
+from src.managers.managers_builders import (
     AFrameworkManagerBuilder, BuilderException, ModelManagerBuilder, RayTuneManagerBuilder, OptunaManagerBuilder,
     HyperoptManagerBuilder, BayesianManagerBuilder, TalosManagerBuilder
 )
