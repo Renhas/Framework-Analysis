@@ -9,6 +9,7 @@ from sklearn.datasets import load_diabetes
 from sklearn.model_selection import train_test_split
 
 from src.loaders.loaders_factory import SaveLoaderFactory, OptunaSaveLoaderFactory
+from src.managers.bayesian_manager import BayesianManager, BayesianParamsManager
 from src.managers.talos_manager import TalosManager, TalosParamsManger
 from src.managers.hyperopt_manager import HyperoptManager, HyperoptParamsManager
 from src.managers.optuna_manager import OptunaManager, OptunaParamsManager
@@ -84,7 +85,7 @@ class TestHyperopt():
         clean_up("tests/TestHyperopt/")
         
 class TestTalos():
-    def test_talos(self):
+    def test_search(self):
         clean_up("tests/TestTalos/")
         sl = SaveLoaderFactory().create("tests/TestTalos/")
         kit = ManagersKit(create_model_manager(), TalosParamsManger(get_params()))
@@ -98,3 +99,16 @@ class TestTalos():
         clean_up("TalosSeek/")
         clean_up("tests/TestTalos/")
         
+class TestBayesian():
+    def test_search(self):
+        clean_up("tests/TestBayesian/")
+        sl = SaveLoaderFactory().create("tests/TestBayesian/")
+        kit = ManagersKit(create_model_manager(), BayesianParamsManager(get_params()))
+        config = get_config()
+        manager = BayesianManager(sl, kit, config)
+        
+        manager.search()
+        
+        assert sl.iter_count == config.max_iter
+        assert sl.load_trials(0).shape[0] == config.n_trials
+        clean_up("tests/TestBayesian/")

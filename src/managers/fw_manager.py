@@ -134,12 +134,6 @@ class FrameworkManager(ABC):
             self.__loader.next_iter()
             if logger:
                 logger.log("Results saved")
-                
-    def __get_results(self) -> Tuple[BaseEstimator, dict, dict]:
-        history, results, best_params = self.one_iteration()
-        model, test_results = self.__best_model(best_params)
-        results.update(test_results)
-        return model, history, results
 
     def one_iteration(self) -> Tuple[dict, dict, dict]:
         return self.__format_results(*self._optimize())
@@ -147,6 +141,12 @@ class FrameworkManager(ABC):
     @abstractmethod            
     def _optimize(self) -> Tuple[TrialsConverter, int]: 
         pass
+                
+    def __get_results(self) -> Tuple[BaseEstimator, dict, dict]:
+        history, results, best_params = self.one_iteration()
+        model, test_results = self.__best_model(best_params)
+        results.update(test_results)
+        return model, history, results
     
     def __save_all(self, model: BaseEstimator, history: dict, results: dict):
         self.__loader.save_model(model)
